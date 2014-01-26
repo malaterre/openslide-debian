@@ -1,0 +1,49 @@
+#!/usr/bin/make -f
+#export DH_VERBOSE=1
+
+%:
+	dh $@ --parallel
+
+# by default build is not verbose enough to check build flags:
+override_dh_auto_configure:
+	dh_auto_configure -- --disable-silent-rules
+
+get-orig-source:
+	uscan --verbose --force-download --rename
+
+VER_FULL = $(shell dpkg-parsechangelog | grep '^Version' | cut -d' ' -f2 | cut -f1 -d-)
+
+# I could not get spaces working, instead duplicate boilerplate code:
+ListofKnownProperties.html:
+	wget -O $@ http://openslide.org/properties/
+Trestleformat.html:
+	wget -O $@ http://openslide.org/formats/trestle/
+Hamamatsuformat.html:
+	wget -O $@ http://openslide.org/formats/hamamatsu/
+Aperioformat.html:
+	wget -O $@ http://openslide.org/formats/aperio/
+Sakuraformat.html:
+	wget -O $@ http://openslide.org/formats/sakura/
+MIRAXformat.html:
+	wget -O $@ http://openslide.org/formats/mirax/
+GenerictiledTIFFformat.html:
+	wget -O $@ http://openslide.org/formats/generic-tiff/
+
+%.xml: %.html
+	xsltproc --nonet --output $<.dummy.xml --html debian/process.xsl $<
+	sed -i -e 's/BEGIN SECTION/<refsection>/g' -e 's@END SECTION@</refsection>@g' $<.dummy.xml
+	xmllint --nonet --output $@ --format $<.dummy.xml
+	rm $<.dummy.xml
+
+debian/openslide-formats.3 : ListofKnownProperties.xml Trestleformat.xml Hamamatsuformat.xml Aperioformat.xml Sakuraformat.xml MIRAXformat.xml GenerictiledTIFFformat.xml debian/openslide-formats.3.xml
+	(cd debian && sed -e 's@VER_FULL@$(VER_FULL)@g' openslide-formats.3.xml > openslide.tmp.xml)
+	(cd debian && xsltproc --xinclude openslide.tmp.xml)
+
+# DO NOT USE for now
+#debian/openslide-quickhash1sum.1: debian/openslide-quickhash1sum.1.in
+#	help2man --include=$< --output=$@ \
+#		--no-info `basename $@ .1` --version-string=$(VER_FULL) --no-discard-stderr
+#
+#debian/openslide-write-png.1: debian/openslide-write-png.1.in
+#	help2man --include=$< --output=$@ \
+#		--no-info `basename $@ .1` --version-string=$(VER_FULL) --no-discard-stderr

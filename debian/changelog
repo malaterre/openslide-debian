@@ -1,0 +1,71 @@
+openslide (3.4.0-1) unstable; urgency=low
+
+  * New upstream, Closes: #735382, #732273, #734375
+  * Move openslide supported file format doc to openslide-formats.3
+  * Add new depends to sqlite3
+  * Bump Std-Vers to 3.9.5 no changes needed
+
+ -- Mathieu Malaterre <malat@debian.org>  Sun, 26 Jan 2014 09:27:48 +0100
+
+openslide (3.3.3-1) unstable; urgency=low
+
+  * New upstream: adds minor compatibility improvements for Aperio JP2K
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 17 Apr 2013 16:39:14 +0200
+
+openslide (3.3.2-1) unstable; urgency=low
+
+  * New upstream: fixes seams in MIRAX 2.2 slides
+  * Make sure that build is verbose
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 11 Dec 2012 09:42:54 +0100
+
+openslide (3.3.1-1) unstable; urgency=low
+
+  * New upstream
+  * Update man page
+  * remove patches applied upstream:
+    - debian/patches/remove_valgrind.patch
+    - debian/patches/remove_calgrind.patch
+  * Add missing B-D: libxml2-dev 
+
+ -- Mathieu Malaterre <malat@debian.org>  Sun, 21 Oct 2012 18:37:54 +0200
+
+openslide (3.2.6-2) unstable; urgency=low
+
+  * Rebuild against libtiff5
+  * Use my @d.o alias, remove DMUA flag
+  * Add missing copyrights in d/copyright
+  * Use dh(9) for hardening flags
+  * Make multiarch
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 11 Apr 2012 12:15:58 +0200
+
+openslide (3.2.6-1) unstable; urgency=low
+
+  * Fix regression in openslide_read_region introduced in 3.2.5
+  * Bump Std-Ver to 3.9.3, no changes needed.
+  * Replace DEP5 with Copyright Format 1.0.
+
+ -- Mathieu Malaterre <mathieu.malaterre@gmail.com>  Sun, 26 Feb 2012 22:10:24 +0100
+
+openslide (3.2.5-1) unstable; urgency=low
+
+  * New upstream
+  * Redo the man page directly using docbook.
+
+ -- Mathieu Malaterre <mathieu.malaterre@gmail.com>  Mon, 19 Dec 2011 17:53:33 +0100
+
+openslide (3.2.4-2) unstable; urgency=low
+
+  * Fix Vcs-Browser URL
+  * Update man pages
+  * Fix lintian warnings about d/copyright
+
+ -- Mathieu Malaterre <mathieu.malaterre@gmail.com>  Wed, 07 Dec 2011 22:18:43 +0100
+
+openslide (3.2.4-1) unstable; urgency=low
+
+  * Initial release (Closes: #640027)
+
+ -- Mathieu Malaterre <mathieu.malaterre@gmail.com>  Thu, 01 Sep 2011 17:18:40 +0200

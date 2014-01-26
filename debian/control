@@ -1,0 +1,97 @@
+Source: openslide
+Section: libs
+Priority: optional
+Maintainer: Debian Med Packaging Team <debian-med-packaging@lists.alioth.debian.org>
+Uploaders: Mathieu Malaterre <malat@debian.org>
+Build-Depends: debhelper (>= 9),
+ libjpeg-dev, libopenjpeg-dev, zlib1g-dev, libtiff-dev, libgtk2.0-dev, libxml2-dev, libsqlite3-dev
+Standards-Version: 3.9.5
+Homepage: http://openslide.org
+Vcs-Browser: http://anonscm.debian.org/viewvc/debian-med/trunk/packages/openslide/trunk/
+Vcs-Svn: svn://anonscm.debian.org/debian-med/trunk/packages/openslide/trunk/
+
+Package: libopenslide0
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: library for reading whole slide image files
+ OpenSlide is a C library that provides a simple interface to read whole-slide
+ images also known as virtual slides.
+ .
+ Whole-slide images, also known as virtual slides, are large, high resolution
+ images used in digital pathology. Reading these images using standard image
+ tools or libraries is a challenge because these tools are typically designed
+ for images that can comfortably be uncompressed into RAM or a swap file.
+ Whole-slide images routinely exceed RAM sizes, often occupying tens of
+ gigabytes when uncompressed. Additionally, whole-slide images are typically
+ multi-resolution, and only a small amount of image data might be needed at a
+ particular resolution.
+ .
+ This library currently supports:
+  - Aperio (.svs, .tif)
+  - Hamamatsu (.vms, .vmu, .ndpi)
+  - Leica (.scn)
+  - MIRAX (.mrxs)
+  - Sakura (.svslide)
+  - Trestle (.tif)
+  - Generic tiled TIFF (.tif)
+ .
+ This package contains the libraries needed to run OpenSlide applications.
+
+Package: libopenslide-dev
+Provides: libopenslide0-dev
+Section: libdevel
+Architecture: any
+Depends: ${misc:Depends}, libopenslide0 (= ${binary:Version})
+Description: Development files for the OpenSlide library
+ OpenSlide is a C library that provides a simple interface to read whole-slide
+ images also known as virtual slides.
+ .
+ Whole-slide images, also known as virtual slides, are large, high resolution
+ images used in digital pathology. Reading these images using standard image
+ tools or libraries is a challenge because these tools are typically designed
+ for images that can comfortably be uncompressed into RAM or a swap file.
+ Whole-slide images routinely exceed RAM sizes, often occupying tens of
+ gigabytes when uncompressed. Additionally, whole-slide images are typically
+ multi-resolution, and only a small amount of image data might be needed at a
+ particular resolution.
+ .
+ This library currently supports:
+  - Aperio (.svs, .tif)
+  - Hamamatsu (.vms, .vmu, .ndpi)
+  - Leica (.scn)
+  - MIRAX (.mrxs)
+  - Sakura (.svslide)
+  - Trestle (.tif)
+  - Generic tiled TIFF (.tif)
+ .
+ This package contains development files needed to build OpenSlide applications.
+
+Package: openslide-tools
+Section: graphics
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: libtiff-tools
+Description: Manipulation and conversion tools for OpenSlide
+ OpenSlide is a C library that provides a simple interface to read whole-slide
+ images also known as virtual slides.
+ .
+ Whole-slide images, also known as virtual slides, are large, high resolution
+ images used in digital pathology. Reading these images using standard image
+ tools or libraries is a challenge because these tools are typically designed
+ for images that can comfortably be uncompressed into RAM or a swap file.
+ Whole-slide images routinely exceed RAM sizes, often occupying tens of
+ gigabytes when uncompressed. Additionally, whole-slide images are typically
+ multi-resolution, and only a small amount of image data might be needed at a
+ particular resolution.
+ .
+ This library currently supports:
+  - Aperio (.svs, .tif)
+  - Hamamatsu (.vms, .vmu, .ndpi)
+  - Leica (.scn)
+  - MIRAX (.mrxs)
+  - Sakura (.svslide)
+  - Trestle (.tif)
+  - Generic tiled TIFF (.tif)
+ .
+ This package contains command line tools for file manipulation.

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl" ?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<refentry id="openslide-formats">
+  <refmeta>
+    <refentrytitle>OPENSLIDE-FORMATS</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo class="source">OpenSlide</refmiscinfo>
+    <refmiscinfo class="version">VER_FULL</refmiscinfo>
+    <refmiscinfo class="manual">File Formats</refmiscinfo>
+  </refmeta>
+  <refnamediv>
+    <refname>openslide-formats</refname>
+    <refpurpose>Reference supported formats</refpurpose>
+  </refnamediv>
+  <refsection id="description">
+    <title>DESCRIPTION</title>
+  </refsection>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../ListofKnownProperties.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../Trestleformat.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../Hamamatsuformat.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../Aperioformat.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../MIRAXformat.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../Sakuraformat.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../GenerictiledTIFFformat.xml"/>
+  <refsect1 id="authors">
+    <title>AUTHORS</title>
+    <para>The Carnegie Mellon School of Computer Science.</para>
+    <para>This manual page was written by Mathieu Malaterre
+&lt;malat@debian.org&gt; for the Debian GNU/Linux system (but may be used by others).</para>
+  </refsect1>
+</refentry>

@@ -1,0 +1,3 @@
+usr/lib/*/libopenslide.so
+usr/include/openslide/*.h
+usr/lib/*/pkgconfig/*.pc

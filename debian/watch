@@ -1,0 +1,3 @@
+version=3
+http://openslide.org/download \
+.*/openslide-([\d\.]+)\.tar\.xz
