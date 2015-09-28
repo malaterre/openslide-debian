@@ -4,15 +4,19 @@ Priority: optional
 Maintainer: Debian Med Packaging Team <debian-med-packaging@lists.alioth.debian.org>
 Uploaders: Mathieu Malaterre <malat@debian.org>
 Build-Depends: debhelper (>= 9),
- libjpeg-dev, libopenjpeg-dev, zlib1g-dev, libtiff-dev, libgtk2.0-dev, libxml2-dev, libsqlite3-dev
-Standards-Version: 3.9.5
+               libgtk2.0-dev,
+               libjpeg-dev,
+               libopenjp2-7-dev,
+               libsqlite3-dev,
+               libtiff-dev,
+               libxml2-dev,
+               zlib1g-dev
+Standards-Version: 3.9.6
 Homepage: http://openslide.org
-Vcs-Browser: http://anonscm.debian.org/viewvc/debian-med/trunk/packages/openslide/trunk/
-Vcs-Svn: svn://anonscm.debian.org/debian-med/trunk/packages/openslide/trunk/
 
 Package: libopenslide0
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Pre-Depends: ${misc:Pre-Depends}
 Description: library for reading whole slide image files
  OpenSlide is a C library that provides a simple interface to read whole-slide
@@ -32,8 +36,10 @@ Description: library for reading whole slide image files
   - Hamamatsu (.vms, .vmu, .ndpi)
   - Leica (.scn)
   - MIRAX (.mrxs)
+  - Philips (.tiff)
   - Sakura (.svslide)
   - Trestle (.tif)
+  - Ventana (.bif, .tif)
   - Generic tiled TIFF (.tif)
  .
  This package contains the libraries needed to run OpenSlide applications.
@@ -42,7 +48,7 @@ Package: libopenslide-dev
 Provides: libopenslide0-dev
 Section: libdevel
 Architecture: any
-Depends: ${misc:Depends}, libopenslide0 (= ${binary:Version})
+Depends: libopenslide0 (= ${binary:Version}), ${misc:Depends}
 Description: Development files for the OpenSlide library
  OpenSlide is a C library that provides a simple interface to read whole-slide
  images also known as virtual slides.
@@ -70,7 +76,7 @@ Description: Development files for the OpenSlide library
 Package: openslide-tools
 Section: graphics
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: libtiff-tools
 Description: Manipulation and conversion tools for OpenSlide
  OpenSlide is a C library that provides a simple interface to read whole-slide

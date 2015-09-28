@@ -16,13 +16,16 @@
   <refsection id="description">
     <title>DESCRIPTION</title>
   </refsection>
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../ListofKnownProperties.xml"/>
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../Trestleformat.xml"/>
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../Hamamatsuformat.xml"/>
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../Aperioformat.xml"/>
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../MIRAXformat.xml"/>
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../Sakuraformat.xml"/>
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../GenerictiledTIFFformat.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../properties.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../aperio.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../hamamatsu.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../leica.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../mirax.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../philips.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../sakura.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../trestle.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../ventana.xml"/>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../generic-tiff.xml"/>
   <refsect1 id="authors">
     <title>AUTHORS</title>
     <para>The Carnegie Mellon School of Computer Science.</para>

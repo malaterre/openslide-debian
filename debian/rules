@@ -14,19 +14,25 @@ get-orig-source:
 VER_FULL = $(shell dpkg-parsechangelog | grep '^Version' | cut -d' ' -f2 | cut -f1 -d-)
 
 # I could not get spaces working, instead duplicate boilerplate code:
-ListofKnownProperties.html:
-	wget -O $@ http://openslide.org/properties/
-Trestleformat.html:
-	wget -O $@ http://openslide.org/formats/trestle/
-Hamamatsuformat.html:
-	wget -O $@ http://openslide.org/formats/hamamatsu/
-Aperioformat.html:
+properties.html:
+	wget -O $@ http://openslide.org/docs/properties/
+aperio.html:
 	wget -O $@ http://openslide.org/formats/aperio/
-Sakuraformat.html:
-	wget -O $@ http://openslide.org/formats/sakura/
-MIRAXformat.html:
+hamamatsu.html:
+	wget -O $@ http://openslide.org/formats/hamamatsu/
+leica.html:
+	wget -O $@ http://openslide.org/formats/leica/
+mirax.html:
 	wget -O $@ http://openslide.org/formats/mirax/
-GenerictiledTIFFformat.html:
+philips.html:
+	wget -O $@ http://openslide.org/formats/philips/
+sakura.html:
+	wget -O $@ http://openslide.org/formats/sakura/
+trestle.html:
+	wget -O $@ http://openslide.org/formats/trestle/
+ventana.html:
+	wget -O $@ http://openslide.org/formats/ventana/
+generic-tiff.html:
 	wget -O $@ http://openslide.org/formats/generic-tiff/
 
 %.xml: %.html
@@ -35,7 +41,7 @@ GenerictiledTIFFformat.html:
 	xmllint --nonet --output $@ --format $<.dummy.xml
 	rm $<.dummy.xml
 
-debian/openslide-formats.3 : ListofKnownProperties.xml Trestleformat.xml Hamamatsuformat.xml Aperioformat.xml Sakuraformat.xml MIRAXformat.xml GenerictiledTIFFformat.xml debian/openslide-formats.3.xml
+debian/openslide-formats.3 : properties.xml aperio.xml hamamatsu.xml leica.xml mirax.xml philips.xml sakura.xml trestle.xml ventana.xml generic-tiff.xml debian/openslide-formats.3.xml
 	(cd debian && sed -e 's@VER_FULL@$(VER_FULL)@g' openslide-formats.3.xml > openslide.tmp.xml)
 	(cd debian && xsltproc --xinclude openslide.tmp.xml)
 

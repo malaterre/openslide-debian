@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: OPENSLIDE-FORMATS
 .\"    Author: [see the "AUTHORS" section]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 01/26/2014
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 09/28/2015
 .\"    Manual: File Formats
-.\"    Source: OpenSlide 3.4.0
+.\"    Source: OpenSlide 3.4.1
 .\"  Language: English
 .\"
-.TH "OPENSLIDE\-FORMATS" "3" "01/26/2014" "OpenSlide 3\&.4\&.0" "File Formats"
+.TH "OPENSLIDE\-FORMATS" "3" "09/28/2015" "OpenSlide 3\&.4\&.1" "File Formats"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -160,29 +160,31 @@ The contents of the TIFF YResolution tag\&.
 .RE
 .SS "Vendor\-specific properties"
 .PP
-A list of vendor\-specific properties can be found on the pages for each vendor format, linked from
-\m[blue]\fBSupported Virtual Slide Formats\fR\m[]\&\s-2\u[1]\d\s+2\&.
-.SH "TRESTLE FORMAT"
+A list of vendor\-specific properties can be found on the
+\m[blue]\fBpages for each vendor format\fR\m[]\&\s-2\u[1]\d\s+2\&.
+.SH "APERIO FORMAT"
 .PP
 Format
 .RS 4
-single\-file pyramidal tiled TIFF, with non\-standard metadata and overlaps; additional files contain more metadata and detailed overlap info
+single\-file pyramidal tiled TIFF, with non\-standard metadata and compression
 .RE
 .PP
 File extensions
 .RS 4
-
+\&.svs,
 \&.tif
 .RE
 .PP
 OpenSlide vendor backend
 .RS 4
-
-trestle
+aperio
 .RE
+.SS "Vendor Documentation"
+.PP
+\m[blue]\fBhttp://www\&.aperio\&.com/documents/api/Aperio_Digital_Slides_and_Third\-party_data_interchange\&.pdf\fR\m[]
 .SS "Detection"
 .PP
-Trestle slides are stored in single\-file TIFF format\&. OpenSlide will detect a file as Trestle if:
+Aperio slides are stored in single\-file TIFF format\&. OpenSlide will detect a file as Aperio if:
 .sp
 .RS 4
 .ie n \{\
@@ -203,10 +205,7 @@ The file is TIFF\&.
 .sp -1
 .IP "  2." 4.2
 .\}
-The TIFF
-Software
-tag starts with
-MedScan\&.
+The initial image is tiled\&.
 .RE
 .sp
 .RS 4
@@ -219,18 +218,8 @@ MedScan\&.
 .\}
 The
 ImageDescription
-tag is present\&.
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 4.\h'+01'\c
-.\}
-.el \{\
-.sp -1
-.IP "  4." 4.2
-.\}
-All images are tiled\&.
+tag starts with
+Aperio\&.
 .RE
 .SS "Relevant TIFF tags"
 .TS
@@ -243,133 +232,87 @@ Description
 T}
 .T&
 l l
-l l
 l l.
 T{
 ImageDescription
 T}:T{
-Stores some important key\-value pairs, see below
+Stores some important key\-value pairs and other information, see below
 T}
 T{
-Software
+Compression
 T}:T{
-Starts with \(rqMedScan\(rq
-T}
-T{
-XResolution, YResolution
-T}:T{
-Seems to store microns\-per\-pixel (MPP), which may or may not take into account the correct objective power\&. Note that this is inverted from standard TIFF, which stores pixels\-per\-unit, not units\-per\-pixel\&.
+May be 33003 or 33005, which represent specific kinds of JPEG 2000 compression, see below
 T}
 .TE
 .sp 1
 .SS "Extra data stored in ImageDescription"
 .PP
-The
+For tiled images, the
 ImageDescription
-tag contains semicolon\-delimited key\-value pairs\&. A key\-value pair is equals\-delimited\&. We use the
-OverlapsXY
-and
-Background Color
-keys from the
-ImageDescription, and ignore the rest\&. All of these values are stored as properties starting with \(rqtrestle\&.\(rq\&.
-.TS
-allbox tab(:);
-lB lB.
-T{
-Key
-T}:T{
-Description
-T}
-.T&
-l l
-l l
-l l
-l l
-l l.
-T{
-Background Color
-T}:T{
-Hex\-encoded background color info, assumed to be in the format RRGGBB\&.
-T}
-T{
-White Balance
-T}:T{
-Hex\-encoded white balance
-T}
-T{
-Objective Power
-T}:T{
-Reported objective power, often incorrect\&.
-T}
-T{
-JPEG Quality
-T}:T{
-The JPEG quality value\&.
-T}
-T{
-OverlapsXY
-T}:T{
-Overlaps, see below\&.
-T}
-.TE
-.sp 1
+tag contains some dimensional downsample information as well as what look like offsets\&. Additionally, vertical line\-delimited key\-value pairs are stored, in at least the full\-resolution image\&. A key\-value pair is equals\-delimited\&. These key\-values are stored as properties starting with \(lqaperio\&.\(rq\&. Currently, OpenSlide does not use any of the information present in these key\-value fields\&.
+.PP
+For stripped images, the
+ImageDescription
+tag may contain a name, followed by a carriage return\&. This is used for naming the associated images\&. The second image in the file does not have a name, though it is an associated image\&.
 .SS "TIFF Image Directory Organization"
 .PP
-The first image in the TIFF file is the full\-resolution image\&. The subsequent images are assumed to be decreasingly sized reduced\-resolution images\&.
-.SS "Overlaps"
+\m[blue]\fBhttp://www\&.aperio\&.com/documents/api/Aperio_Digital_Slides_and_Third\-party_data_interchange\&.pdf\fR\m[]
+page 14:
 .PP
-The
-OverlapsXY
-pseudo\-field encodes a list of tile overlap values as ASCII\&.
+The first image in an SVS file is always the baseline image (full resolution)\&. This image is always tiled, usually with a tile size of 240x240 pixels\&. The second image is always a thumbnail, typically with dimensions of about 1024x768 pixels\&. Unlike the other slide images, the thumbnail image is always stripped\&. Following the thumbnail there may be one or more intermediate \(lqpyramid\(rq images\&. These are always compressed with the same type of compression as the baseline image, and have a tiled organization with the same tile size\&.
 .PP
-Example: \(rq64 64 32 32 16 16\(rq (note the initial space)\&.
+Optionally at the end of an SVS file there may be a slide label image, which is a low resolution picture taken of the slide\(cqs label, and/or a macro camera image, which is a low resolution picture taken of the entire slide\&. The label and macro images are always stripped\&.
+.SS "JPEG 2000 (compression types 33003 or 33005)"
 .PP
-These values represent the standard overlaps between adjacent tiles in X and Y, in pixels\&. This example encodes 3 levels worth of overlaps\&. Further overlaps are assumed to have the value 0\&.
-.PP
-Individual tile overlaps may differ from the standard overlaps\&. These individual overlaps are recorded in
-\&.tif\-Nb
-files adjacent to the
-\&.tif
-file, where
-N
-is the level number\&. OpenSlide does not read these files, though they have been partially decoded; see
-\m[blue]\fBissue 21\fR\m[]\&\s-2\u[2]\d\s+2
-for details\&.
+Some Aperio files use compression type 33003 or 33005\&. Images using this compression need to be decoded as a JPEG 2000 codestream\&. For 33003: YCbCr format, possibly with a chroma subsampling of 4:2:2\&. For 33005: RGB format\&. Note that the TIFF file may not encode the colorspace or subsampling parameters in the
+PhotometricInterpretation
+field, nor the
+YCbCrSubsampling
+field, even though the TIFF standard seems to require this\&. The correct subsampling can be found in the JPEG 2000 codestream\&.
 .SS "Associated Images"
+.PP
+thumbnail
+.RS 4
+the second image in the file
+.RE
+.PP
+label
+.RS 4
+optional, the name \(lqlabel\(rq is given in
+ImageDescription
+.RE
 .PP
 macro
 .RS 4
-the image with a filename extension of \(rq\&.Full\(rq (optional)
+optional, the name \(lqmacro\(rq is given in
+ImageDescription
 .RE
 .SS "Known Properties"
 .PP
-All data encoded in the
+All key\-value data encoded in the
 ImageDescription
-TIFF field is represented as properties prefixed with \(rqtrestle\&.\(rq\&.
+TIFF field is represented as properties prefixed with \(lqaperio\&.\(rq\&.
 .PP
 openslide\&.mpp\-x
 .RS 4
-copy of
-tiff\&.XResolution
-(note that this is a totally non\-standard use of this TIFF tag)
+normalized
+aperio\&.MPP
 .RE
 .PP
 openslide\&.mpp\-y
 .RS 4
-copy of
-tiff\&.YResolution
-(note that this is a totally non\-standard use of this TIFF tag)
+normalized
+aperio\&.MPP
 .RE
 .PP
 openslide\&.objective\-power
 .RS 4
 normalized
-trestle\&.Objective Power
+aperio\&.AppMag
 .RE
 .SS "Test Data"
 .PP
-
-\m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Trestle/\fR\m[]
+\m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Aperio/\fR\m[]
 .SH "HAMAMATSU FORMAT"
 .PP
 Format
@@ -386,7 +329,6 @@ File extensions
 .PP
 OpenSlide vendor backend
 .RS 4
-
 hamamatsu
 .RE
 .SS "Detection"
@@ -453,10 +395,7 @@ The file has a TIFF directory structure\&.
 .sp -1
 .IP "  2." 4.2
 .\}
-The
-Software
-tag starts with
-NDP\&.scan\&.
+TIFF tag 65420 is present\&.
 .RE
 .SS "Overview"
 .PP
@@ -557,17 +496,17 @@ T}
 T{
 SourceLens
 T}:T{
-Apparently the magnification
+Apparently the objective power
 T}
 T{
 PhysicalWidth
 T}:T{
-Width of the slide in some unit?
+Width of the main image in nm
 T}
 T{
 PhysicalHeight
 T}:T{
-Height of the slide in some unit?
+Height of the main image in nm
 T}
 T{
 LayerSpacing
@@ -582,22 +521,22 @@ T}
 T{
 PhysicalMacroWidth
 T}:T{
-Unknown
+Width of the macro image in nm
 T}
 T{
 PhysicalMacroHeight
 T}:T{
-Unknown
+Height of the macro image in nm, sometimes with a trailing semicolon
 T}
 T{
 XOffsetFromSlideCentre
 T}:T{
-Unknown
+Distance in X from the center of the entire slide (i\&.e\&., the macro image) to the center of the main image, in nm
 T}
 T{
 YOffsetFromSlideCentre
 T}:T{
-Unknown
+Distance in Y from the center of the entire slide to the center of the main image, in nm
 T}
 .TE
 .sp 1
@@ -995,6 +934,15 @@ or
 ImageHeight
 exceeds the JPEG limit of 65535, then the width or height as stored in the JPEG file is 0\&. libjpeg will refuse to read the header of such a file, so the JPEG data stream must be altered when fed into libjpeg\&.
 .PP
+NDPI is based on the classic TIFF format, which does not support files larger than 4 GB\&. However, NDPI files can be larger than 4 GB\&. NDPI generally handles this by overflowing the corresponding TIFF fields, requiring the reader to guess the high\-order bits\&. This affects TIFF Value Offsets with pointers to out\-of\-line values, as well as the value of the
+StripOffsets
+field\&. Some TIFF fields (e\&.g\&.
+Software) have the same Value Offset in every directory; for these, no concatenation of high\-order bits is necessary\&. For the others (primarily field 65426) it seems reasonable to select high\-order bits which place the value at the largest offset below the directory itself, since the TIFF directory is positioned after the data it points to\&. NDPI always stores next\-directory offsets (in the TIFF header and at the end of each directory) as 64\-bit quantities, even though TIFF specifies them as 32 bits; this is possible because the TIFF standard places them at the end of their parent data structures\&.
+.PP
+It is not clear whether NDPI can support individual directories larger than 4 GB\&. Such files would require additional inferences for the
+StripByteCounts
+field, for Value Offsets that are identical across directories, and for the optimisation entries\&.
+.PP
 Here are the observed TIFF tags:
 .TS
 allbox tab(:);
@@ -1005,6 +953,7 @@ T}:T{
 Description
 T}
 .T&
+l l
 l l
 l l
 l l
@@ -1091,7 +1040,7 @@ T}
 T{
 65420
 T}:T{
-Unknown, always 1?
+Always exists, always 1\&.  File format version?
 T}
 T{
 65421
@@ -1111,7 +1060,7 @@ T}
 T{
 65424
 T}:T{
-Seemingly the Z offset from the center focal plane, in some unit
+Seemingly the Z offset from the center focal plane (in nm?)
 T}
 T{
 65425
@@ -1132,6 +1081,11 @@ T{
 65428
 T}:T{
 Unknown, AuthCode?
+T}
+T{
+65430
+T}:T{
+Unknown, have seen 0\&.0
 T}
 T{
 65433
@@ -1236,24 +1190,26 @@ of \-1 in NDPI
 .RE
 .SS "Known Properties"
 .PP
-All key\-value data stored in the VMS/VMU file, and known tags from the NDPI file, are encoded as properties prefixed with \(rqhamamatsu\&.\(rq\&.
+All key\-value data stored in the VMS/VMU file, and known tags from the NDPI file, are encoded as properties prefixed with \(lqhamamatsu\&.\(rq\&.
 .PP
 openslide\&.mpp\-x
 .RS 4
-for NDPI, calculated as
+For VMS, calculated as
+hamamatsu\&.PhysicalWidth/(1000*openslide\&.level[0]\&.width)\&. For NDPI, calculated as
 10000/tiff\&.XResolution, if
 tiff\&.ResolutionUnit
 is
-centimeter
+centimeter\&.
 .RE
 .PP
 openslide\&.mpp\-y
 .RS 4
-for NDPI, calculated as
+For VMS, calculated as
+hamamatsu\&.PhysicalHeight/(1000*openslide\&.level[0]\&.height)\&. For NDPI, calculated as
 10000/tiff\&.YResolution, if
 tiff\&.ResolutionUnit
 is
-centimeter
+centimeter\&.
 .RE
 .PP
 openslide\&.objective\-power
@@ -1265,40 +1221,32 @@ hamamatsu\&.SourceLens
 .PP
 NDPI format
 .RS 4
-
 \m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Hamamatsu/\fR\m[]
 .RE
 .PP
 VMS format
 .RS 4
-
 \m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Hamamatsu\-vms/\fR\m[]
 .RE
-.SH "APERIO FORMAT"
+.SH "LEICA FORMAT"
 .PP
 Format
 .RS 4
-single\-file pyramidal tiled TIFF, with non\-standard metadata and compression
+single\-file pyramidal tiled BigTIFF with non\-standard metadata
 .RE
 .PP
 File extensions
 .RS 4
-\&.svs,
-\&.tif
+\&.scn
 .RE
 .PP
 OpenSlide vendor backend
 .RS 4
-
-aperio
+leica
 .RE
-.SS "Vendor Documentation"
-.PP
-
-\m[blue]\fBhttp://www\&.aperio\&.com/documents/api/Aperio_Digital_Slides_and_Third\-party_data_interchange\&.pdf\fR\m[]
 .SS "Detection"
 .PP
-Aperio slides are stored in single\-file TIFF format\&. OpenSlide will detect a file as Aperio if:
+Leica slides are stored in single\-file BigTIFF format\&. OpenSlide will detect a file as Leica if:
 .sp
 .RS 4
 .ie n \{\
@@ -1332,9 +1280,11 @@ The initial image is tiled\&.
 .\}
 The
 ImageDescription
-tag starts with
-Aperio\&.
+tag contains valid XML in either of these namespaces:
+<listitem>http://www\&.leica\-microsystems\&.com/scn/2010/03/10 </listitem><listitem>http://www\&.leica\-microsystems\&.com/scn/2010/10/01 </listitem>
 .RE
+.PP
+To open Leica files, OpenSlide must be built with libtiff 4 or above\&.
 .SS "Relevant TIFF tags"
 .TS
 allbox tab(:);
@@ -1345,89 +1295,120 @@ T}:T{
 Description
 T}
 .T&
-l l
 l l.
 T{
 ImageDescription
 T}:T{
-Stores some important key\-value pairs and other information, see below
-T}
-T{
-Compression
-T}:T{
-May be 33003 or 33005, which represent specific kinds of JPEG 2000 compression, see below
+Stores an XML document containing various metadata
 T}
 .TE
 .sp 1
-.SS "Extra data stored in ImageDescription"
+.SS "File Organization"
 .PP
-For tiled images, the
+The
 ImageDescription
-tag contains some dimensional downsample information as well as what look like offsets\&. Additionally, vertical line\-delimited key\-value pairs are stored, in at least the full\-resolution image\&. A key\-value pair is equals\-delimited\&. These key\-values are stored as properties starting with \(rqaperio\&.\(rq\&. Currently, OpenSlide does not use any of the information present in these key\-value fields\&.
+tag of the first TIFF directory contains an XML document that defines the structure of the slide\&.
 .PP
-For stripped images, the
-ImageDescription
-tag may contain a name, followed by a carriage return\&. This is used for naming the associated images\&. The second image in the file does not have a name, though it is an associated image\&.
-.SS "TIFF Image Directory Organization"
+Leica slides are structured as a collection of images, each of which has multiple dimensions (pyramid levels)\&. The collection has a size, and images have a size and position, measured in nanometers\&. Each dimension has a size in pixels, an optional focal plane number, and a TIFF directory containing the image data\&. Fluorescence images have different dimensions (and thus different TIFF directories) for each channel\&. OpenSlide currently rejects fluorescence images and ignores focal planes other than plane 0\&.
 .PP
-\m[blue]\fBhttp://www\&.aperio\&.com/documents/api/Aperio_Digital_Slides_and_Third\-party_data_interchange\&.pdf\fR\m[]
-page 14:
+Brightfield slides have at least two images: a low\-resolution macro image and one or more main images corresponding to regions of the macro image\&. The macro image has a position of (0, 0) and a size matching the size of the collection\&. Fluorescence slides can have two macro images: one brightfield and one fluorescence\&.
 .PP
-The first image in an SVS file is always the baseline image (full resolution)\&. This image is always tiled, usually with a tile size of 240x240 pixels\&. The second image is always a thumbnail, typically with dimensions of about 1024x768 pixels\&. Unlike the other slide images, the thumbnail image is always stripped\&. Following the thumbnail there may be one or more intermediate \(lqpyramid\(rq images\&. These are always compressed with the same type of compression as the baseline image, and have a tiled organization with the same tile size\&.
-.PP
-Optionally at the end of an SVS file there may be a slide label image, which is a low resolution picture taken of the slide\(cqs label, and/or a macro camera image, which is a low resolution picture taken of the entire slide\&. The label and macro images are always stripped\&.
-.SS "JPEG 2000 (compression types 33003 or 33005)"
-.PP
-Some Aperio files use compression type 33003 or 33005\&. Images using this compression need to be decoded as a JPEG 2000 codestream\&. For 33003: YCbCr format, possibly with a chroma subsampling of 4:2:2\&. For 33005: RGB format\&. Note that the TIFF file may not encode the colorspace or subsampling parameters in the
-PhotometricInterpretation
-field, nor the
-YCbCrSubsampling
-field, even though the TIFF standard seems to require this\&. The correct subsampling can be found in the JPEG 2000 codestream\&.
+The slide provides enough information to composite the various images, including the macro image, into a single pyramid\&. However, there are some complications:
+<listitem>The resolution of the macro image is generally not related to the resolution of the main images by a power of two\&.
+</listitem><listitem>Downsampled dimensions are generally downsampled from the next larger dimension by a factor of 4, but main images can be scanned with distinct objectives that may differ by only a factor of 2\&.
+</listitem>.PP
+Thus, in general, the images in a collection cannot be rendered into a unified pyramid without scaling the original pixel data\&. OpenSlide does not attempt to do this\&. Instead, OpenSlide omits the macro image from the pyramid and refuses to open slides whose main images have inconsistent resolutions\&.
 .SS "Associated Images"
-.PP
-thumbnail
-.RS 4
-the second image in the file
-.RE
-.PP
-label
-.RS 4
-optional, the name \(lqlabel\(rq is given in
-ImageDescription
-.RE
 .PP
 macro
 .RS 4
-optional, the name \(lqmacro\(rq is given in
-ImageDescription
+the highest\-resolution dimension of the macro image
 .RE
 .SS "Known Properties"
 .PP
-All key\-value data encoded in the
-ImageDescription
-TIFF field is represented as properties prefixed with \(rqaperio\&.\(rq\&.
+leica\&.aperture
+.RS 4
+the
+numericalAperture
+of the main image
+.RE
+.PP
+leica\&.barcode
+.RS 4
+the
+barcode
+text\&. (For slides in the
+2010/10/01
+namespace, OpenSlide 3\&.4\&.0 and earlier report this property as a Base64\-encoded string; OpenSlide 3\&.4\&.1 and later report it in plain text\&. For slides in the
+2010/03/10
+namespace, OpenSlide reports the barcode as it is stored in the XML, since we do not know whether those barcodes are Base64\-encoded\&. If you have a
+2010/03/10
+slide with a bar code, please comment in
+\m[blue]\fBthis bug\fR\m[]\&\s-2\u[2]\d\s+2
+or contact the OpenSlide mailing list\&.)
+.RE
+.PP
+leica\&.creation\-date
+.RS 4
+the
+creationDate
+of the main image
+.RE
+.PP
+leica\&.device\-model
+.RS 4
+the
+devicemodel
+of the main image
+.RE
+.PP
+leica\&.device\-version
+.RS 4
+the
+deviceversion
+of the main image
+.RE
+.PP
+leica\&.illumination\-source
+.RS 4
+the
+illuminationSource
+of the main image
+.RE
+.PP
+leica\&.objective
+.RS 4
+the
+objective
+of the main image
+.RE
 .PP
 openslide\&.mpp\-x
 .RS 4
-normalized
-aperio\&.MPP
+calculated as
+10000/tiff\&.XResolution, if
+tiff\&.ResolutionUnit
+is
+centimeter
 .RE
 .PP
 openslide\&.mpp\-y
 .RS 4
-normalized
-aperio\&.MPP
+calculated as
+10000/tiff\&.YResolution, if
+tiff\&.ResolutionUnit
+is
+centimeter
 .RE
 .PP
 openslide\&.objective\-power
 .RS 4
 normalized
-aperio\&.AppMag
+leica\&.objective
 .RE
 .SS "Test Data"
 .PP
-
-\m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Aperio/\fR\m[]
+\m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Leica/\fR\m[]
 .SH "MIRAX FORMAT"
 .PP
 Format
@@ -1437,13 +1418,11 @@ multi\-file with very complicated proprietary metadata and indexes
 .PP
 File extensions
 .RS 4
-
 \&.mrxs
 .RE
 .PP
 OpenSlide vendor backend
 .RS 4
-
 mirax
 .RE
 .SS "Detection"
@@ -1533,7 +1512,9 @@ Nonhierarchical records refer to associated images and additional metadata\&. No
 .PP
 A data file begins with a header containing a five\-character ASCII version string, the
 SLIDE_ID
-from the slidedat file, the file number encoded into three ASCII characters, and 256 bytes of padding\&. The remainder of the file contains packed data referenced by the index file\&.
+from the slidedat file, the file number encoded into three ASCII characters, and 256 bytes of padding\&. (In newer slides, the
+SLIDE_ID
+and file number are encoded as UTF\-16LE, so the second half of each value is truncated away\&.) The remainder of the file contains packed data referenced by the index file\&.
 .SS "Slide Position File"
 .PP
 The slide position file is referenced by the
@@ -1555,21 +1536,21 @@ nonhierarchical section\&.
 .PP
 thumbnail
 .RS 4
-the image named \(rqScanDataLayer_SlidePreview\(rq in
+the image named \(lqScanDataLayer_SlidePreview\(rq in
 Slidedat\&.ini
 (optional)
 .RE
 .PP
 label
 .RS 4
-the image named \(rqScanDataLayer_SlideBarcode\(rq in
+the image named \(lqScanDataLayer_SlideBarcode\(rq in
 Slidedat\&.ini
 (optional)
 .RE
 .PP
 macro
 .RS 4
-the image named \(rqScanDataLayer_SlideThumbnail\(rq in
+the image named \(lqScanDataLayer_SlideThumbnail\(rq in
 Slidedat\&.ini
 (optional)
 .RE
@@ -1577,7 +1558,7 @@ Slidedat\&.ini
 .PP
 All key\-value data stored in the
 Slidedat\&.ini
-file are encoded as properties prefixed with \(rqmirax\&.\(rq\&.
+file are encoded as properties prefixed with \(lqmirax\&.\(rq\&.
 .PP
 openslide\&.mpp\-x
 .RS 4
@@ -1605,8 +1586,191 @@ mirax\&.GENERAL\&.OBJECTIVE_MAGNIFICATION
 \m[blue]\fBIntroduction to MIRAX/MRXS\fR\m[]\&\s-2\u[3]\d\s+2\&. Note that our terminology has changed since that document was written; where it says \(lqtile\(rq, substitute \(lqimage\(rq, and where it says \(lqsubtile\(rq, substitute \(lqtile\(rq\&.
 .SS "Test Data"
 .PP
-
 \m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Mirax/\fR\m[]
+.SH "PHILIPS FORMAT"
+.PP
+Format
+.RS 4
+single\-file pyramidal tiled TIFF or BigTIFF with non\-standard metadata
+.RE
+.PP
+File extensions
+.RS 4
+\&.tiff
+.RE
+.PP
+OpenSlide vendor backend
+.RS 4
+philips
+.RE
+.SS "Detection"
+.PP
+Philips TIFF files are stored in single\-file TIFF or BigTIFF format\&. OpenSlide will detect a file as Philips if:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+The file is TIFF\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+The TIFF
+Software
+tag starts with
+Philips\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  3." 4.2
+.\}
+The
+ImageDescription
+tag contains valid XML\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 4.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  4." 4.2
+.\}
+The root element of the XML is
+DataObject
+and has an
+ObjectType
+attribute with a value of
+DPUfsImport\&.
+.RE
+.PP
+To open BigTIFF files, OpenSlide must be built with libtiff 4 or above\&.
+.SS "File Organization"
+.PP
+Philips TIFF is an export format\&. The native Philips format, iSyntax, is a custom multi\-file format not currently supported by OpenSlide\&.
+.PP
+The
+ImageDescription
+tag of the first TIFF directory contains an XML document with a hierarchical structure containing key\-value pairs\&. The keys are based on DICOM tags\&.
+.PP
+The level dimensions given in the TIFF
+ImageWidth
+and
+ImageLength
+fields, and also in the
+ImageDescription
+XML, are merely the TIFF tile size multiplied by the number of tiles in each dimension\&. Thus, they include the size of the padding in the right\-most column and bottom\-most row of tiles\&. Each level typically uses the same tile size but requires a different amount of padding, so the aspect ratios of the levels are inconsistent and the level dimensions are not proportional to the level downsamples\&. Correct downsamples can be calculated from the levels\(cq pixel spacings in the XML metadata\&.
+.PP
+Slides with multiple regions of interest are structured as a single image pyramid enclosing all regions\&. Slides may omit pixel data for TIFF tiles not in an ROI; this is represented as a
+TileOffset
+of 0 and a
+TileByteCount
+of 0\&. When such tiles are downsampled into a tile that does contain pixel data, their contents are rendered as white pixels\&.
+.PP
+Label and macro images are stored as Base64\-encoded JPEGs in the
+ImageDescription
+XML\&. Some slides also store these images as stripped TIFF directories whose
+ImageDescriptions start with
+Label
+and
+Macro, respectively\&.
+.SS "Relevant TIFF tags"
+.TS
+allbox tab(:);
+lB lB.
+T{
+Tag
+T}:T{
+Description
+T}
+.T&
+l l
+l l.
+T{
+ImageDescription
+T}:T{
+Stores an XML document containing various metadata and associated image data
+T}
+T{
+Software
+T}:T{
+Starts with Philips
+T}
+.TE
+.sp 1
+.SS "Associated Images"
+.PP
+label
+.RS 4
+the TIFF directory with an
+ImageDescription
+starting with
+Label, or the image data in the
+DPScannedImage
+with a
+PIM_DP_IMAGE_TYPE
+of
+LABELIMAGE
+.RE
+.PP
+macro
+.RS 4
+the TIFF directory with an
+ImageDescription
+starting with
+Macro, or the image data in the
+DPScannedImage
+with a
+PIM_DP_IMAGE_TYPE
+of
+MACROIMAGE
+.RE
+.SS "Known Properties"
+.PP
+All key\-value data encoded in the
+DPUfsImport
+object, in the first
+DPScannedImage
+object with a
+PIM_DP_IMAGE_TYPE
+of
+WSI, and in that object\(cqs
+PixelDataRepresentation
+objects is represented as properties prefixed with \(lqphilips\&.\(rq\&.
+.PP
+openslide\&.mpp\-x
+.RS 4
+calculated as
+1000 * philips\&.DICOM_PIXEL_SPACING[1]
+.RE
+.PP
+openslide\&.mpp\-y
+.RS 4
+calculated as
+1000 * philips\&.DICOM_PIXEL_SPACING[0]
+.RE
+.SS "Test Data"
+.PP
+No public data available\&. Contact the
+\m[blue]\fBmailing list\fR\m[]\&\s-2\u[4]\d\s+2
+if you have some\&.
 .SH "SAKURA FORMAT"
 .PP
 Format
@@ -1616,13 +1780,11 @@ SQLite database containing pyramid tiles and metadata
 .PP
 File extensions
 .RS 4
-
 \&.svslide
 .RE
 .PP
 OpenSlide vendor backend
 .RS 4
-
 sakura
 .RE
 .SS "Detection"
@@ -1671,7 +1833,7 @@ data = "SVGigaPixelImage"\&.
 .SS "File Organization"
 .PP
 Sakura slides are SQLite 3 database files written by the eXpress Persistent Objects ORM\&. Tables contain slide metadata, associated images, and JPEG tiles\&. Tiles are addressed as
-(downsample, level\-0 X coordinate, level\-0 Y coordinate, color channel), with separate grayscale JPEGs for each color channel\&. Despite the generality of the address format, tiles appear to be organized in a regular grid, with power\-of\-two level downsamples and without overlapping tiles\&. The structure of the file allows scans to be sparse, but it is not clear if this is actually done\&.
+(focal plane, downsample, level\-0 X coordinate, level\-0 Y coordinate, color channel), with separate grayscale JPEGs for each color channel\&. Despite the generality of the address format, tiles appear to be organized in a regular grid, with power\-of\-two level downsamples and without overlapping tiles\&. The structure of the file allows scans to be sparse, but it is not clear if this is actually done\&.
 .SS "SQL Tables"
 .PP
 Some irrelevant tables and columns have been omitted from the summary below\&.
@@ -1917,7 +2079,7 @@ FocusStack
 T}:T{
 blob
 T}:T{
-8 bytes; have seen all zeros
+8 bytes of binary per focal plane; the center focal plane apparently has all zeroes
 T}
 .TE
 .sp 1
@@ -1994,7 +2156,7 @@ T}
 .TE
 .sp 1
 tile.PP
-This table is most naturally used to map tile coordinates to tile IDs, but is not suitable for individual lookups because it has no useful indexes\&.
+This table is most naturally used to map tile coordinates to tile IDs, but is not suitable for individual lookups because it has no useful indexes\&. In addition, some Sakura slides don\(cqt have it\&. OpenSlide ignores the table and constructs tile IDs directly from tile coordinates\&.
 .TS
 allbox tab(:);
 lB lB lB.
@@ -2048,6 +2210,8 @@ T}:T{
 T}
 .TE
 .sp 1
+
+
 Unique table
 .PP
 This is the table named by
@@ -2090,9 +2254,7 @@ T}
 .TE
 .sp 1
 .PP
-This table stores a variety of blob types\&. IDs for image tiles appear to be mechanically generated from the tile coordinates, but OpenSlide does not construct them directly\&. Instead, it uses the
-tile
-table to obtain IDs for each tile\&.
+This table stores a variety of blob types\&.
 .TS
 allbox tab(:);
 lB lB.
@@ -2121,22 +2283,152 @@ T}
 T{
 Header
 T}:T{
-A small binary structure\&. The first 12 bytes are little\-endian 32\-bit integers: tile size in pixels, image width in pixels, image height in pixels\&.
+See below
 T}
 T{
 TOTAL_SIZE
 T}:T{
-The data field is empty\&. The size field is the sum of all other size fields except ++MagicBytes and ++VersionBytes\&.
+The data field is empty\&.  The size field is the sum of all other size fields except ++MagicBytes and ++VersionBytes\&.
 T}
 T{
 T;2048|4096;4;2;0
 T}:T{
-Image tile with downsample 4, X coordinate 2048, Y coordinate 4096, channel 2 (blue)
+Image tile with downsample 4, X coordinate 2048, Y coordinate 4096, channel 2 (blue), focal plane 0
 T}
 T{
 T;2048|4096;4;2;0#
 T}:T{
 MD5 hash of the T;2048|4096;4;2;0 image tile
+T}
+.TE
+.sp 1
+Header blob
+.PP
+The
+Header
+blob is a small binary structure containing little\-endian integers as follows:
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Offset
+T}:T{
+Size
+T}:T{
+Description
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+0
+T}:T{
+4
+T}:T{
+Tile size in pixels
+T}
+T{
+4
+T}:T{
+4
+T}:T{
+Image width in pixels
+T}
+T{
+8
+T}:T{
+4
+T}:T{
+Image height in pixels
+T}
+T{
+12
+T}:T{
+4
+T}:T{
+Unknown; have seen \(lq8\(rq (bits per channel?)
+T}
+T{
+16
+T}:T{
+4
+T}:T{
+Number of focal planes
+T}
+T{
+20
+T}:T{
+4
+T}:T{
+Unknown; have seen \(lq3\(rq (number of channels?)
+T}
+T{
+24
+T}:T{
+4
+T}:T{
+Unknown; have seen \(lq1\(rq
+T}
+T{
+28
+T}:T{
+2
+T}:T{
+Unknown; have seen \(lq256\(rq
+T}
+T{
+30
+T}:T{
+4
+T}:T{
+Unknown; have seen \(lq1\(rq
+T}
+T{
+34
+T}:T{
+4
+T}:T{
+Unknown; have seen \(lq2\(rq
+T}
+T{
+38
+T}:T{
+4
+T}:T{
+Unknown; have seen \(lq3\(rq
+T}
+T{
+42
+T}:T{
+4
+T}:T{
+Unknown; have seen \(lq4\(rq
+T}
+T{
+46
+T}:T{
+4
+T}:T{
+Unknown; have seen \(lq5\(rq
+T}
+T{
+50
+T}:T{
+4
+T}:T{
+Unknown; have seen \(lq6\(rq
 T}
 .TE
 .sp 1
@@ -2158,68 +2450,57 @@ SVSlideDataXPO\&.m_overviewScan
 .PP
 thumbnail
 .RS 4
-
 SVHRScanDataXPO\&.ThumbnailImage
 .RE
 .SS "Known Properties"
 .PP
 sakura\&.Creator
 .RS 4
-
 SVSlideDataXPO\&.Creator
 .RE
 .PP
 sakura\&.Date
 .RS 4
-
 SVSlideDataXPO\&.Date
 .RE
 .PP
 sakura\&.Description
 .RS 4
-
 SVSlideDataXPO\&.Description
 .RE
 .PP
 sakura\&.DiagnosisCode
 .RS 4
-
 SVSlideDataXPO\&.DiagnosisCode
 .RE
 .PP
 sakura\&.FocussingMethod
 .RS 4
-
 SVHRScanDataXPO\&.FocussingMethod
 .RE
 .PP
 sakura\&.Keywords
 .RS 4
-
 SVSlideDataXPO\&.Keywords
 .RE
 .PP
 sakura\&.NominalLensMagnification
 .RS 4
-
 SVHRScanDataXPO\&.NominalLensMagnification
 .RE
 .PP
 sakura\&.ResolutionMmPerPix
 .RS 4
-
 SVHRScanDataXPO\&.ResolutionMmPerPix
 .RE
 .PP
 sakura\&.ScanId
 .RS 4
-
 SVHRScanDataXPO\&.ScanId
 .RE
 .PP
 sakura\&.SlideId
 .RS 4
-
 SVSlideDataXPO\&.SlideId
 .RE
 .PP
@@ -2245,6 +2526,317 @@ sakura\&.NominalLensMagnification
 No public data available\&. Contact the
 \m[blue]\fBmailing list\fR\m[]\&\s-2\u[4]\d\s+2
 if you have some\&.
+.SH "TRESTLE FORMAT"
+.PP
+Format
+.RS 4
+single\-file pyramidal tiled TIFF, with non\-standard metadata and overlaps; additional files contain more metadata and detailed overlap info
+.RE
+.PP
+File extensions
+.RS 4
+\&.tif
+.RE
+.PP
+OpenSlide vendor backend
+.RS 4
+trestle
+.RE
+.SS "Detection"
+.PP
+Trestle slides are stored in single\-file TIFF format\&. OpenSlide will detect a file as Trestle if:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+The file is TIFF\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+The TIFF
+Software
+tag starts with
+MedScan\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  3." 4.2
+.\}
+The
+ImageDescription
+tag is present\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 4.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  4." 4.2
+.\}
+All images are tiled\&.
+.RE
+.SS "Relevant TIFF tags"
+.TS
+allbox tab(:);
+lB lB.
+T{
+Tag
+T}:T{
+Description
+T}
+.T&
+l l
+l l
+l l.
+T{
+ImageDescription
+T}:T{
+Stores some important key\-value pairs, see below
+T}
+T{
+Software
+T}:T{
+Starts with \(lqMedScan\(rq
+T}
+T{
+XResolution, YResolution
+T}:T{
+Seems to store microns\-per\-pixel (MPP), which may or may not take into account the correct objective power\&. Note that this is inverted from standard TIFF, which stores pixels\-per\-unit, not units\-per\-pixel\&.
+T}
+.TE
+.sp 1
+.SS "Extra data stored in ImageDescription"
+.PP
+The
+ImageDescription
+tag contains semicolon\-delimited key\-value pairs\&. A key\-value pair is equals\-delimited\&. We use the
+OverlapsXY
+and
+Background Color
+keys from the
+ImageDescription, and ignore the rest\&. All of these values are stored as properties starting with \(lqtrestle\&.\(rq\&.
+.TS
+allbox tab(:);
+lB lB.
+T{
+Key
+T}:T{
+Description
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+Background Color
+T}:T{
+Hex\-encoded background color info, assumed to be in the format RRGGBB\&.
+T}
+T{
+White Balance
+T}:T{
+Hex\-encoded white balance
+T}
+T{
+Objective Power
+T}:T{
+Reported objective power, often incorrect\&.
+T}
+T{
+JPEG Quality
+T}:T{
+The JPEG quality value\&.
+T}
+T{
+OverlapsXY
+T}:T{
+Overlaps, see below\&.
+T}
+.TE
+.sp 1
+.SS "TIFF Image Directory Organization"
+.PP
+The first image in the TIFF file is the full\-resolution image\&. The subsequent images are assumed to be decreasingly sized reduced\-resolution images\&.
+.SS "Overlaps"
+.PP
+The
+OverlapsXY
+pseudo\-field encodes a list of tile overlap values as ASCII\&.
+.PP
+Example: \(lq64 64 32 32 16 16\(rq (note the initial space)\&.
+.PP
+These values represent the standard overlaps between adjacent tiles in X and Y, in pixels\&. This example encodes 3 levels worth of overlaps\&. Further overlaps are assumed to have the value 0\&.
+.PP
+Individual tile overlaps may differ from the standard overlaps\&. These individual overlaps are recorded in
+\&.tif\-Nb
+files adjacent to the
+\&.tif
+file, where
+N
+is the level number\&. OpenSlide does not read these files, though they have been partially decoded; see
+\m[blue]\fBissue 21\fR\m[]\&\s-2\u[5]\d\s+2
+for details\&.
+.SS "Associated Images"
+.PP
+macro
+.RS 4
+the image with a filename extension of \(lq\&.Full\(rq (optional)
+.RE
+.SS "Known Properties"
+.PP
+All data encoded in the
+ImageDescription
+TIFF field is represented as properties prefixed with \(lqtrestle\&.\(rq\&.
+.PP
+openslide\&.mpp\-x
+.RS 4
+copy of
+tiff\&.XResolution
+(note that this is a totally non\-standard use of this TIFF tag)
+.RE
+.PP
+openslide\&.mpp\-y
+.RS 4
+copy of
+tiff\&.YResolution
+(note that this is a totally non\-standard use of this TIFF tag)
+.RE
+.PP
+openslide\&.objective\-power
+.RS 4
+normalized
+trestle\&.Objective Power
+.RE
+.SS "Test Data"
+.PP
+\m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Trestle/\fR\m[]
+.SH "VENTANA FORMAT"
+.PP
+Format
+.RS 4
+single\-file pyramidal tiled BigTIFF with non\-standard metadata and overlaps
+.RE
+.PP
+File extensions
+.RS 4
+\&.bif,
+\&.tif
+.RE
+.PP
+OpenSlide vendor backend
+.RS 4
+ventana
+.RE
+.SS "Detection"
+.PP
+Ventana slides are stored in single\-file BigTIFF format\&. OpenSlide will detect a file as Ventana if:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+The file is TIFF\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+The
+XMP
+tag contains valid XML\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  3." 4.2
+.\}
+The XML contains an
+iScan
+element, either as the root element or as a child of a
+Metadata
+root element\&.
+.RE
+.PP
+To open Ventana files, OpenSlide must be built with libtiff 4 or above\&.
+.SS "Associated Images"
+.PP
+macro
+.RS 4
+the TIFF directory whose
+ImageDescription
+is
+Label Image
+or
+Label_Image
+.RE
+.PP
+thumbnail
+.RS 4
+the TIFF directory whose
+ImageDescription
+is
+Thumbnail
+.RE
+.SS "Known Properties"
+.PP
+All XML attributes in the
+iScan
+element are represented as properties prefixed with \(lqventana\&.\(rq\&.
+.PP
+openslide\&.mpp\-x
+.RS 4
+normalized
+ventana\&.ScanRes
+.RE
+.PP
+openslide\&.mpp\-y
+.RS 4
+normalized
+ventana\&.ScanRes
+.RE
+.PP
+openslide\&.objective\-power
+.RS 4
+normalized
+ventana\&.Magnification
+.RE
+.SS "Test Data"
+.PP
+\m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Ventana/\fR\m[]
 .SH "GENERIC TILED TIFF FORMAT"
 .PP
 Format
@@ -2254,13 +2846,11 @@ single\-file pyramidal tiled TIFF
 .PP
 File extensions
 .RS 4
-
 \&.tif
 .RE
 .PP
 OpenSlide vendor backend
 .RS 4
-
 generic\-tiff
 .RE
 .SS "Detection"
@@ -2307,7 +2897,10 @@ The first image in the TIFF file is the full\-resolution image\&. Any other tile
 None\&.
 .SS "Known Properties"
 .PP
-Many TIFF tags are encoded as properties starting with \(rqtiff\&.\(rq\&.
+Many TIFF tags are encoded as properties starting with \(lqtiff\&.\(rq\&.
+.SS "Test Data"
+.PP
+\m[blue]\fBhttp://openslide\&.cs\&.cmu\&.edu/download/openslide\-testdata/Generic\-TIFF/\fR\m[]
 .SH "AUTHORS"
 .PP
 The Carnegie Mellon School of Computer Science\&.
@@ -2315,14 +2908,14 @@ The Carnegie Mellon School of Computer Science\&.
 This manual page was written by Mathieu Malaterre <malat@debian\&.org> for the Debian GNU/Linux system (but may be used by others)\&.
 .SH "NOTES"
 .IP " 1." 4
-Supported Virtual Slide Formats
+pages for each vendor format
 .RS 4
 \%http://openslide.org/formats/
 .RE
 .IP " 2." 4
-issue 21
+this bug
 .RS 4
-\%http://openslide.orghttps://github.com/openslide/openslide/issues/21#issuecomment-23615583
+\%http://openslide.orghttps://github.com/openslide/openslide/issues/155
 .RE
 .IP " 3." 4
 Introduction to MIRAX/MRXS
@@ -2332,5 +2925,10 @@ Introduction to MIRAX/MRXS
 .IP " 4." 4
 mailing list
 .RS 4
-\%http://lists.andrew.cmu.edu/mailman/listinfo/openslide-users/
+\%http://openslide.orghttps://lists.andrew.cmu.edu/mailman/listinfo/openslide-users/
+.RE
+.IP " 5." 4
+issue 21
+.RS 4
+\%http://openslide.orghttps://github.com/openslide/openslide/issues/21#issuecomment-23615583
 .RE
