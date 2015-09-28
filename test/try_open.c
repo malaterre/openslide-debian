@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <glib.h>
 #include "openslide.h"
+#include "test-common.h"
 
 #define MAX_FDS 128
 #define TIME_ITERATIONS 5
@@ -62,6 +63,57 @@ static void check_error(openslide_t *osr) {
   if (error != NULL) {
     fail("%s", error);
   }
+}
+
+#define CHECK_RET(call, result)			\
+  do {						\
+    if (call != result) {			\
+      fail("%s != %s", #call, #result);		\
+    }						\
+  } while (0)
+
+#define CHECK_EMPTY_PTR_ARRAY(call)			\
+  do {							\
+    const void **ret = (const void **) call;		\
+    if (ret == NULL || ret[0] != NULL) {		\
+      fail("%s didn't return an empty array", #call);	\
+    }							\
+  } while (0)
+
+#define CHECK_W_H(call, expected_w, expected_h)			\
+  do {								\
+    call;							\
+    if (w != expected_w || h != expected_h) {			\
+      fail("%s != (%s, %s)", #call, #expected_w, #expected_h);	\
+    }								\
+  } while (0)
+
+static void check_api_failures(openslide_t *osr) {
+  int64_t w, h;
+
+  CHECK_RET(openslide_get_level_count(osr), -1);
+  CHECK_W_H(openslide_get_level0_dimensions(osr, &w, &h), -1, -1);
+  CHECK_W_H(openslide_get_level_dimensions(osr, 0, &w, &h), -1, -1);
+  CHECK_W_H(openslide_get_level_dimensions(osr, 27, &w, &h), -1, -1);
+  CHECK_W_H(openslide_get_level_dimensions(osr, -3, &w, &h), -1, -1);
+  CHECK_RET(openslide_get_level_downsample(osr, 0), -1);
+  CHECK_RET(openslide_get_level_downsample(osr, 27), -1);
+  CHECK_RET(openslide_get_level_downsample(osr, -3), -1);
+  CHECK_RET(openslide_get_best_level_for_downsample(osr, 0.8), -1);
+  CHECK_RET(openslide_get_best_level_for_downsample(osr, 2), -1);
+  CHECK_RET(openslide_get_best_level_for_downsample(osr, 4096), -1);
+  CHECK_EMPTY_PTR_ARRAY(openslide_get_property_names(osr));
+  CHECK_RET(openslide_get_property_value(osr, OPENSLIDE_PROPERTY_NAME_VENDOR),
+            NULL);
+  CHECK_EMPTY_PTR_ARRAY(openslide_get_associated_image_names(osr));
+  CHECK_W_H(openslide_get_associated_image_dimensions(osr, "label", &w, &h),
+            -1, -1);
+  CHECK_W_H(openslide_get_associated_image_dimensions(osr, "macro", &w, &h),
+            -1, -1);
+
+  openslide_read_region(osr, NULL, 0, 0, 0, 10, 10);
+  openslide_read_associated_image(osr, "label", NULL);
+  openslide_read_associated_image(osr, "macro", NULL);
 }
 
 static void check_props(openslide_t *osr) {
@@ -181,7 +233,11 @@ int main(int argc, char **argv) {
 
   // Check for open errors
   if (osr != NULL) {
-    check_error(osr);
+    const char *error = openslide_get_error(osr);
+    if (error != NULL) {
+      check_api_failures(osr);
+      fail("%s", error);
+    }
   } else if (!have_error) {
     // openslide_open returned NULL but logged nothing
     have_error = TRUE;
@@ -198,18 +254,14 @@ int main(int argc, char **argv) {
 
   // Check for file descriptor leaks
   for (int i = 0; i < MAX_FDS; i++) {
-    struct stat st;
-    if (!fstat(i, &st) && !g_hash_table_lookup(fds, GINT_TO_POINTER(i))) {
-      // leaked
-      char *link_path = g_strdup_printf("/proc/%d/fd/%d", getpid(), i);
-      char *target = g_file_read_link(link_path, NULL);
-      if (target == NULL) {
-        target = g_strdup("<unknown>");
+    if (!g_hash_table_lookup(fds, GINT_TO_POINTER(i))) {
+      char *path = get_fd_path(i);
+      if (path != NULL) {
+        // leaked
+        fprintf(stderr, "Leaked file descriptor to %s\n", path);
+        have_error = TRUE;
+        g_free(path);
       }
-      fprintf(stderr, "Leaked file descriptor to %s\n", target);
-      have_error = TRUE;
-      g_free(target);
-      g_free(link_path);
     }
   }
   g_hash_table_destroy(fds);

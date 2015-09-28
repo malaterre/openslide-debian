@@ -125,23 +125,17 @@ static bool paint_region(openslide_t *osr, cairo_t *cr,
                          GError **err) {
   struct generic_tiff_ops_data *data = osr->data;
   struct level *l = (struct level *) level;
-  bool success = false;
 
   TIFF *tiff = _openslide_tiffcache_get(data->tc, err);
   if (tiff == NULL) {
     return false;
   }
 
-  if (TIFFSetDirectory(tiff, l->tiffl.dir)) {
-    success = _openslide_grid_paint_region(l->grid, cr, tiff,
-                                           x / l->base.downsample,
-                                           y / l->base.downsample,
-                                           level, w, h,
-                                           err);
-  } else {
-    g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
-                "Cannot set TIFF directory");
-  }
+  bool success = _openslide_grid_paint_region(l->grid, cr, tiff,
+                                              x / l->base.downsample,
+                                              y / l->base.downsample,
+                                              level, w, h,
+                                              err);
   _openslide_tiffcache_put(data->tc, tiff);
 
   return success;
