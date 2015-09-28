@@ -1,7 +1,7 @@
 /*
  *  OpenSlide, a library for reading whole slide image files
  *
- *  Copyright (c) 2013 Carnegie Mellon University
+ *  Copyright (c) 2014 Carnegie Mellon University
  *  All rights reserved.
  *
  *  OpenSlide is free software: you can redistribute it and/or modify
@@ -19,21 +19,22 @@
  *
  */
 
-#ifndef OPENSLIDE_OPENSLIDE_DECODE_SQLITE_H_
-#define OPENSLIDE_OPENSLIDE_DECODE_SQLITE_H_
+#define _WIN32_WINNT 0x0600
 
-#include <stdbool.h>
-#include <glib.h>
-#include <sqlite3.h>
+#include <stdio.h>
+#include <windows.h>
 
-/* SQLite support code */
+int main(int argc, char **argv) {
+  if (argc != 3) {
+    fprintf(stderr, "Usage: %s <src> <dst>\n", argv[0]);
+    return 1;
+  }
 
-sqlite3 *_openslide_sqlite_open(const char *filename, GError **err);
-sqlite3_stmt *_openslide_sqlite_prepare(sqlite3 *db, const char *sql,
-                                        GError **err);
-bool _openslide_sqlite_step(sqlite3_stmt *stmt, GError **err);
-void _openslide_sqlite_propagate_error(sqlite3 *db, GError **err);
-void _openslide_sqlite_propagate_stmt_error(sqlite3_stmt *stmt, GError **err);
-void _openslide_sqlite_close(sqlite3 *db);
-
-#endif
+  const char *src = argv[1];
+  const char *dst = argv[2];
+  if (!CreateSymbolicLink(dst, src, 0)) {
+    fprintf(stderr, "Failed with error %lu\n", GetLastError());
+    return 1;
+  }
+  return 0;
+}

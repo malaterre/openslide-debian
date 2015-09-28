@@ -76,15 +76,25 @@ void _openslide_jpeg_stdio_src(j_decompress_ptr cinfo, FILE *infile);
 void _openslide_jpeg_mem_src (j_decompress_ptr cinfo,
                               unsigned char *inbuffer, unsigned long insize);
 
-// error function for libjpeg
-struct _openslide_jpeg_error_mgr {
-  struct jpeg_error_mgr pub;      // public fields
 
-  jmp_buf *env;
-  GError *err;
-};
+/*
+ * Low-level JPEG decoding mechanism
+ */
+struct _openslide_jpeg_decompress *_openslide_jpeg_decompress_create(struct jpeg_decompress_struct **out_cinfo);
 
-struct jpeg_error_mgr *_openslide_jpeg_set_error_handler(struct _openslide_jpeg_error_mgr *jerr,
-                                                         jmp_buf *env);
+void _openslide_jpeg_decompress_init(struct _openslide_jpeg_decompress *dc,
+                                     jmp_buf *env);
+
+bool _openslide_jpeg_decompress_run(struct _openslide_jpeg_decompress *dc,
+                                    // uint8_t * if grayscale, else uint32_t *
+                                    void *dest,
+                                    bool grayscale,
+                                    int32_t w, int32_t h,
+                                    GError **err);
+
+void _openslide_jpeg_propagate_error(GError **err,
+                                     struct _openslide_jpeg_decompress *dc);
+
+void _openslide_jpeg_decompress_destroy(struct _openslide_jpeg_decompress *dc);
 
 #endif

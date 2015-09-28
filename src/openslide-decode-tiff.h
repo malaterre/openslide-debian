@@ -37,6 +37,10 @@ struct _openslide_tiff_level {
   int64_t tile_h;
   int64_t tiles_across;
   int64_t tiles_down;
+
+  bool tile_read_direct;
+  gint warned_read_indirect;
+  uint16_t photometric;
 };
 
 struct _openslide_tiffcache;
@@ -46,6 +50,12 @@ bool _openslide_tiff_level_init(TIFF *tiff,
                                 struct _openslide_level *level,
                                 struct _openslide_tiff_level *tiffl,
                                 GError **err);
+
+bool _openslide_tiff_check_missing_tile(struct _openslide_tiff_level *tiffl,
+                                        TIFF *tiff,
+                                        int64_t tile_col, int64_t tile_row,
+                                        bool *is_missing,
+                                        GError **err);
 
 bool _openslide_tiff_read_tile(struct _openslide_tiff_level *tiffl,
                                TIFF *tiff,
@@ -69,6 +79,10 @@ bool _openslide_tiff_add_associated_image(openslide_t *osr,
                                           struct _openslide_tiffcache *tc,
                                           tdir_t dir,
                                           GError **err);
+
+bool _openslide_tiff_set_dir(TIFF *tiff,
+                             tdir_t dir,
+                             GError **err);
 
 
 /* TIFF handles are not thread-safe, so we have a handle cache for
